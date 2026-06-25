@@ -10,6 +10,11 @@ M = 250
 N = 1024
 shape = np.array([M, N])
 
+pixels = np.arange(0, N)
+
+lambs = 0.037033476478940355 * pixels + 381.02184936261204 + 0.21
+dlamb = lambs[1] - lambs[0]
+
 i_min = 512
 i_max = 600
 
@@ -35,6 +40,15 @@ for file in os.listdir(root_folder):
 
         else:
             continue
+
+        scale = np.sum(data_mean.mean(axis = 0) * dlamb)
+
+        fig, ax = plt.subplots(1)
+        ax.set_title(label)
+        ax.plot(lambs, data_mean.mean(axis = 0) / scale)
+        ax.grid(True)
+
+        plt.show()
             
 
     # Things break and I can't be bothered
