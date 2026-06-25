@@ -45,5 +45,5 @@ for file in os.listdir(root_folder):
 
 # Output data
 df = pd.DataFrame(labeled_data)
-df.to_csv(root_folder + "/labeled_data.csv", index = False)
+df.to_csv(root_folder + "/cnn_labeled_data.csv", index = False)
 np.save(root_folder + "/shape.npy", shape)
