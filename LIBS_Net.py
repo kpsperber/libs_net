@@ -292,6 +292,16 @@ class LIBS_Net:
 
         return predictions
     
+    def save(self):
+        self.model.save("libs_net.keras")
+
+    def load(self):
+        root = os.getcwd()
+        model_file = os.join(root, "Model/libs_net.keras")
+
+        self.model = tf.keras.models.load_model(model_file)
+        
+    
     def evaluate(self):
         predictions = self.predict(
             self.X_test[..., 0] * self.X_scale
