@@ -11,6 +11,44 @@ from sklearn.metrics import (
     r2_score
 )
 
+def heteroscedastic_gaussian_nll(y_true, y_pred):
+    y_true = tf.cast(y_true, y_pred.dtype)
+    y_true = tf.reshape(y_true, (-1,))
+
+    mean = y_pred[:, 0]
+    log_variance = y_pred[:, 1]
+
+    # Prevent numerical overflow or an unrealistically tiny variance.
+    log_variance = tf.clip_by_value(
+        log_variance,
+        clip_value_min=-10.0,
+        clip_value_max=10.0
+    )
+
+    squared_error = tf.square(y_true - mean)
+
+    nll = 0.5 * (
+        log_variance
+        + squared_error * tf.exp(-log_variance)
+    )
+
+    return tf.reduce_mean(nll)
+
+def concentration_rmse(y_true, y_pred):
+    y_true = tf.cast(y_true, y_pred.dtype)
+    y_true = tf.reshape(y_true, (-1,))
+    mean = y_pred[:, 0]
+
+    return tf.sqrt(tf.reduce_mean(tf.square(y_true - mean)))
+
+
+def concentration_mae(y_true, y_pred):
+    y_true = tf.cast(y_true, y_pred.dtype)
+    y_true = tf.reshape(y_true, (-1,))
+    mean = y_pred[:, 0]
+
+    return tf.reduce_mean(tf.abs(y_true - mean))
+
 class LIBS_Net:
     def __init__(self):
         self.model = None
@@ -191,6 +229,9 @@ class LIBS_Net:
         self.plot_training_history(history, "CNN")
 
         return history
+    
+    def train(self, epochs = 300, batch_size = 32):
+        return
 
     def plot_training_history(self, history, model):
         output_folder = os.path.join(self.metrics_folder, model)
@@ -393,6 +434,8 @@ class LIBS_Net:
           
     def evaluate_cnn(self):
         output_folder = os.path.join(self.metrics_folder, "CNN")
+        os.makedirs(output_folder, exist_ok = True)
+        
         predictions = self.predict_cnn(
             self.cnn_X_test[..., 0] * self.cnn_X_scale
         )
