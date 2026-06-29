@@ -9,7 +9,25 @@ def remove_K_Ca(normalized_data):
     nd_data = np.zeros_like(normalized_data)
 
 def normalize(data_1D):
+    # K doublet window mask 
+    k_mask = (lambs >= 404.41) & (lambs <= 404.72)
+    k_region_wl = lambs[k_mask]
     normalized_data = np.zeros_like(data_1D)
+
+    for shot_idx in range(data_1D.shape[0]):
+        spectrum = data_1D[shot_idx]                 
+        spectrum = np.clip(spectrum, 0, None)        
+
+        # Integrate K doublet area for this shot
+        k_region_int = spectrum[k_mask]
+        k_area = np.trapezoid(k_region_int, k_region_wl)
+
+        # Guard against bad shots
+        if k_area < 1.0:
+            normalized_data[shot_idx] = spectrum      # leave unnormalized (or could zero it)
+            continue
+
+        normalized_data[shot_idx] = spectrum / k_area
     return normalized_data
 
 def fit_voigt_profile(nd_data):
@@ -61,12 +79,13 @@ for file in os.listdir(root_folder):
 
     mu = np.mean(data_1D, axis = 1)
     sigma = np.std(data_1D, axis = 1)
-    snr = mu / sigma
+    snr = 0
 
-
+    # Background subtract K and Ca Peaks
+    nd_data = remove_K_Ca(normalized_data)
 
     # Fit Voigt Profile to Nd Spectrum
-    fit_parameters = fit_voigt_profile(normalized_data)
+    fit_parameters = fit_voigt_profile(nd_data)
 
     # Extract local data
     j_min = np.argmin(np.abs(lambs - lamb_min))
