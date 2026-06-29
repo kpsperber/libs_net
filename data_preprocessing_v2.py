@@ -61,13 +61,12 @@ for file in os.listdir(root_folder):
 
     mu = np.mean(data_1D, axis = 1)
     sigma = np.std(data_1D, axis = 1)
-    snr = 0
+    snr = mu / sigma
 
-    # Background subtract K and Ca Peaks
-    nd_data = remove_K_Ca(normalized_data)
+
 
     # Fit Voigt Profile to Nd Spectrum
-    fit_parameters = fit_voigt_profile(nd_data)
+    fit_parameters = fit_voigt_profile(normalized_data)
 
     # Extract local data
     j_min = np.argmin(np.abs(lambs - lamb_min))
