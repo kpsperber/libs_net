@@ -75,11 +75,11 @@ class LIBS_Net:
         self.metrics_folder = os.getcwd() + "/Training Metrics"
 
     def read_cnn_data(self, root_folder):
-        self.root_folder = root_folder
+        self.root_folder = os.path.join(root_folder, "Training Data")
 
-        self.shape = tuple(np.load(os.path.join(root_folder, "shape.npy")).astype(int))
+        self.shape = tuple(np.load(os.path.join(self.root_folder, "shape.npy")).astype(int))
 
-        labeled_data = pd.read_csv(os.path.join(root_folder, "cnn_labeled_data.csv"))
+        labeled_data = pd.read_csv(os.path.join(self.root_folder, "cnn_global_data.csv"))
 
         labels = []
         for label in labeled_data.keys():
