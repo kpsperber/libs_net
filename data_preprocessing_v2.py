@@ -59,6 +59,10 @@ for file in os.listdir(root_folder):
     # Save full spectrum for Global CNN
     global_cnn_data[label] = data_1D.flatten()
 
+    mu = np.mean(data_1D, axis = 1)
+    sigma = np.std(data_1D, axis = 1)
+    snr = 0
+
     # Background subtract K and Ca Peaks
     nd_data = remove_K_Ca(normalized_data)
 

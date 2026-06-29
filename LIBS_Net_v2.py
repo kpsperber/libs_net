@@ -181,7 +181,20 @@ class LIBS_Net:
         print(f"y shape: {self.local_y.shape}")
 
     def read_physics_data(self, root_folder):
-        pass
+        training_folder = os.path.join(self.root, root_folder)
+        training_folder = os.path.join(training_folder, "Training Folder")
+        data_file = os.path.join(training_folder, "physics_data.csv")
+
+        labeled_data = pd.read_csv(data_file)
+
+        labels = []
+        for label in labeled_data.keys():
+            labels.append(label.split("p")[0])
+
+        labels = np.float32(labels)
+
+        # Extract parameters
+
 
     # -------------------------
     # Splitting and scaling
@@ -276,7 +289,9 @@ class LIBS_Net:
         print(f"Test Shape: {self.local_X_test.shape}")
 
     def split_physics_data(self, test_size = 0.2, validation_size = 0.2, random_state = 42):
-        pass
+        valid_data = []
+
+        # Can only train on successful fits
 
     def split_data(self, test_size = 0.2, validation_size = 0.2, random_state = 42):
 
@@ -453,7 +468,33 @@ class LIBS_Net:
         self.physics_model = model
 
     def build_model(self):
-        pass
+        number_of_layers = 4
+        model = tf.keras.Sequential([
+            tf.keras.layers.Input(shape = (number_of_layers,)),
+            tf.keras.layers.Dense(
+                32,
+                activation = "relu",
+                kernel_regularizer = tf.keras.regularizers.l2(1e-4)
+            ),
+            tf.keras.layers.Dropout(0.1),
+            tf.keras.layers.Dense(
+                16,
+                activation = "relu"
+            ),
+            tf.keras.layers.Dense(1)
+        ], name = "super_model")
+
+        model.compile(
+            optimizer = tf.keras.optimizers.Adam(learning_rate = 1e-3),
+            loss = tf.keras.losses.Huber(),
+            metrics = [
+                tf.keras.metrics.RootMeanSquaredError(name = "rmse"),
+                tf.keras.metrics.MeanAbsoluteError(name = "mae")
+            ]
+        )
+
+        model.summary()
+        self.model = model
 
     # -------------------------
     # Training
